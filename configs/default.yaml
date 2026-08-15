@@ -1,0 +1,38 @@
+project:
+  name: FootballAnalysisAI
+  profile: best_quality
+
+engines:
+  game_state:
+    default: soccernet
+    candidates:
+      - soccernet
+
+  calibration:
+    default: nbjw
+    candidates:
+      - nbjw
+      - pnlcalib
+      - tvcalib
+
+  detection:
+    default: yolo
+    candidates:
+      - yolo
+      - rfdetr
+
+  tracking:
+    default: botsort
+    candidates:
+      - botsort
+      - strongsort
+      - bytetrack
+      - ocsort
+
+benchmark:
+  weights:
+    quality: 0.50
+    robustness: 0.20
+    speed: 0.15
+    integration: 0.10
+    license: 0.05

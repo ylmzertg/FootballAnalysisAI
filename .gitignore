@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Models / large files
+models/
+pretrained_models/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Video / media input-output
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.avi
+
+# Generated benchmark data
+benchmark/results/
+benchmark/cache/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Environment / secrets
+.env
+.env.*
