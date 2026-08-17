@@ -2,32 +2,30 @@ project:
   name: FootballAnalysisAI
   profile: best_quality
 
-engines:
-  game_state:
-    default: soccernet
-    candidates:
-      - soccernet
+paths:
+  input_dir: input
+  output_dir: output
+  models_dir: models
 
+engines:
   calibration:
-    default: nbjw
-    candidates:
-      - nbjw
-      - pnlcalib
-      - tvcalib
+    primary: pnlcalib
+    fallback: tvcalib
+    coordinate_system: top_left_origin_x_0_105_y_0_68_m
 
   detection:
     default: yolo
-    candidates:
-      - yolo
-      - rfdetr
 
   tracking:
-    default: botsort
-    candidates:
-      - botsort
-      - strongsort
-      - bytetrack
-      - ocsort
+    default: bytetrack
+
+  team_classification:
+    default: v2.4
+    canonical_identity: true
+
+runtime:
+  preferred_device: auto
+  cpu_fallback: true
 
 benchmark:
   weights:

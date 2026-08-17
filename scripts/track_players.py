@@ -3,12 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from pathlib import Path
 
 import cv2
 import supervision as sv
 import torch
 from ultralytics import YOLO
+
+from core.runtime_paths import resolve_project_path
 
 
 CLASS_NAMES = {
@@ -27,50 +28,33 @@ def parse_args():
     )
     parser.add_argument(
         "--source",
-        default=r"E:\Youtube\SporAnimasyon\SporAnimasyonCalisma\data\input\input.mp4",
+        default=r"input\input.mp4",
+        help="Relative paths resolve from the project root.",
     )
     parser.add_argument(
         "--model",
         default=r"models\football-player-detection.pt",
+        help="Relative paths resolve from the project root.",
     )
     parser.add_argument(
         "--output",
         default=r"output\player_tracking.mp4",
+        help="Relative paths resolve from the project root.",
     )
     parser.add_argument(
         "--jsonl",
         default=r"output\player_tracking.jsonl",
+        help="Relative paths resolve from the project root.",
     )
-    parser.add_argument(
-        "--imgsz",
-        type=int,
-        default=960,
-    )
-    parser.add_argument(
-        "--conf",
-        type=float,
-        default=0.25,
-    )
-    parser.add_argument(
-        "--max-frames",
-        type=int,
-        default=300,
-    )
-    parser.add_argument(
-        "--minimum-consecutive-frames",
-        type=int,
-        default=3,
-    )
-    parser.add_argument(
-        "--lost-track-buffer",
-        type=int,
-        default=30,
-    )
+    parser.add_argument("--imgsz", type=int, default=960)
+    parser.add_argument("--conf", type=float, default=0.25)
+    parser.add_argument("--max-frames", type=int, default=300)
+    parser.add_argument("--minimum-consecutive-frames", type=int, default=3)
+    parser.add_argument("--lost-track-buffer", type=int, default=30)
     return parser.parse_args()
 
 
 def color_for_track(track_id: int):
-    # Deterministic BGR pseudo-color without external palettes.
     return (
         int((37 * track_id) % 200 + 55),
         int((97 * track_id) % 200 + 55),
@@ -81,16 +65,21 @@ def color_for_track(track_id: int):
 def main():
     args = parse_args()
 
-    source = Path(args.source)
-    model_path = Path(args.model)
-    output_path = Path(args.output)
-    jsonl_path = Path(args.jsonl)
+    source = resolve_project_path(args.source)
+    model_path = resolve_project_path(args.model)
+    output_path = resolve_project_path(args.output)
+    jsonl_path = resolve_project_path(args.jsonl)
 
     if not source.exists():
-        raise FileNotFoundError(f"Input video not found: {source}")
-
+        raise FileNotFoundError(
+            f"Input video not found: {source}\n"
+            "Copy a video to input\\input.mp4 or pass --source <path>."
+        )
     if not model_path.exists():
-        raise FileNotFoundError(f"Model not found: {model_path}")
+        raise FileNotFoundError(
+            f"Model not found: {model_path}\n"
+            "Copy football-player-detection.pt to models\\ or pass --model <path>."
+        )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     jsonl_path.parent.mkdir(parents=True, exist_ok=True)
@@ -119,14 +108,12 @@ def main():
         minimum_consecutive_frames=args.minimum_consecutive_frames,
     )
 
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     writer = cv2.VideoWriter(
         str(output_path),
-        fourcc,
+        cv2.VideoWriter_fourcc(*"mp4v"),
         fps,
         (width, height),
     )
-
     if not writer.isOpened():
         cap.release()
         raise RuntimeError(f"Could not create output video: {output_path}")
@@ -170,7 +157,6 @@ def main():
                 )[0]
 
                 detections = sv.Detections.from_ultralytics(result)
-
                 if len(detections) > 0 and detections.class_id is not None:
                     mask = [
                         int(class_id) in TRACKED_CLASS_IDS
@@ -179,44 +165,29 @@ def main():
                     detections = detections[mask]
 
                 tracked = tracker.update_with_detections(detections)
-
                 records = []
 
                 if len(tracked) > 0:
                     for i in range(len(tracked)):
-                        x1, y1, x2, y2 = map(
-                            float, tracked.xyxy[i].tolist()
-                        )
-
+                        x1, y1, x2, y2 = map(float, tracked.xyxy[i].tolist())
                         confidence = (
                             float(tracked.confidence[i])
-                            if tracked.confidence is not None
-                            else 0.0
+                            if tracked.confidence is not None else 0.0
                         )
-
                         class_id = (
                             int(tracked.class_id[i])
-                            if tracked.class_id is not None
-                            else -1
+                            if tracked.class_id is not None else -1
                         )
-
                         track_id = (
                             int(tracked.tracker_id[i])
-                            if tracked.tracker_id is not None
-                            else -1
+                            if tracked.tracker_id is not None else -1
                         )
-
                         if track_id < 0:
                             continue
 
                         unique_ids.add(track_id)
                         total_tracked_detections += 1
-
-                        label = CLASS_NAMES.get(
-                            class_id,
-                            str(class_id),
-                        )
-
+                        label = CLASS_NAMES.get(class_id, str(class_id))
                         foot_x = (x1 + x2) / 2.0
                         foot_y = y2
 
@@ -227,42 +198,25 @@ def main():
                                 "class_name": label,
                                 "confidence": round(confidence, 5),
                                 "bbox_xyxy": [
-                                    round(x1, 2),
-                                    round(y1, 2),
-                                    round(x2, 2),
-                                    round(y2, 2),
+                                    round(x1, 2), round(y1, 2),
+                                    round(x2, 2), round(y2, 2),
                                 ],
                                 "foot_point": [
-                                    round(foot_x, 2),
-                                    round(foot_y, 2),
+                                    round(foot_x, 2), round(foot_y, 2)
                                 ],
                             }
                         )
 
                         color = color_for_track(track_id)
-
                         p1 = (int(round(x1)), int(round(y1)))
                         p2 = (int(round(x2)), int(round(y2)))
-
-                        cv2.rectangle(
-                            frame,
-                            p1,
-                            p2,
-                            color,
-                            2,
-                            cv2.LINE_AA,
-                        )
+                        cv2.rectangle(frame, p1, p2, color, 2, cv2.LINE_AA)
 
                         text = f"ID {track_id} | {label} {confidence:.2f}"
                         (tw, th), baseline = cv2.getTextSize(
-                            text,
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.52,
-                            1,
+                            text, cv2.FONT_HERSHEY_SIMPLEX, 0.52, 1
                         )
-
                         top_y = max(p1[1], th + baseline + 5)
-
                         cv2.rectangle(
                             frame,
                             (p1[0], top_y - th - baseline - 5),
@@ -270,7 +224,6 @@ def main():
                             color,
                             -1,
                         )
-
                         cv2.putText(
                             frame,
                             text,
@@ -281,36 +234,30 @@ def main():
                             1,
                             cv2.LINE_AA,
                         )
-
                         cv2.circle(
                             frame,
-                            (
-                                int(round(foot_x)),
-                                int(round(foot_y)),
-                            ),
+                            (int(round(foot_x)), int(round(foot_y))),
                             4,
                             color,
                             -1,
                             cv2.LINE_AA,
                         )
 
-                frame_payload = {
-                    "frame_index": frame_index,
-                    "timestamp_seconds": round(frame_index / fps, 5),
-                    "tracks": records,
-                }
-
                 jsonl_file.write(
-                    json.dumps(frame_payload, ensure_ascii=False) + "\n"
+                    json.dumps(
+                        {
+                            "frame_index": frame_index,
+                            "timestamp_seconds": round(frame_index / fps, 5),
+                            "tracks": records,
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
                 )
 
                 cv2.putText(
                     frame,
-                    (
-                        f"Frame: {frame_index + 1} | "
-                        f"Tracked: {len(records)} | "
-                        f"Unique IDs: {len(unique_ids)}"
-                    ),
+                    f"Frame: {frame_index + 1} | Tracked: {len(records)} | Unique IDs: {len(unique_ids)}",
                     (20, 35),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.75,
@@ -318,40 +265,31 @@ def main():
                     2,
                     cv2.LINE_AA,
                 )
-
                 writer.write(frame)
 
                 frame_index += 1
-
                 if frame_index == 1 or frame_index % 25 == 0:
                     elapsed = time.perf_counter() - started
-                    effective_fps = frame_index / max(elapsed, 1e-6)
                     print(
-                        f"Processed {frame_index}"
-                        f"/{total_frames if total_frames > 0 else '?'}"
+                        f"Processed {frame_index}/{total_frames if total_frames > 0 else '?'}"
                         f" | tracked={total_tracked_detections}"
                         f" | unique_ids={len(unique_ids)}"
-                        f" | {effective_fps:.2f} FPS"
+                        f" | {frame_index / max(elapsed, 1e-6):.2f} FPS"
                     )
-
         finally:
             cap.release()
             writer.release()
 
     elapsed = time.perf_counter() - started
-
     print("=" * 76)
     print("DONE")
     print(f"Frames processed    : {frame_index}")
     print(f"Tracked detections  : {total_tracked_detections}")
     print(f"Unique track IDs    : {len(unique_ids)}")
     print(f"Elapsed             : {elapsed:.1f} s")
-    print(
-        f"Average FPS         : "
-        f"{frame_index / max(elapsed, 1e-6):.2f}"
-    )
-    print(f"Video output        : {output_path.resolve()}")
-    print(f"Tracking JSONL      : {jsonl_path.resolve()}")
+    print(f"Average FPS         : {frame_index / max(elapsed, 1e-6):.2f}")
+    print(f"Video output        : {output_path}")
+    print(f"Tracking JSONL      : {jsonl_path}")
     print("=" * 76)
 
 
