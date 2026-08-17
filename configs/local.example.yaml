@@ -1,0 +1,16 @@
+paths:
+  project_root: "."
+  input_dir: "./input"
+  output_dir: "./output"
+  models_dir: "./models"
+
+calibration:
+  pnlcalib:
+    root: "../CalibrationEngines/PnLCalib"
+    device: "cpu"
+  tvcalib:
+    root: "../CalibrationEngines/tvcalib"
+    device: "cpu"
+
+runtime:
+  preferred_device: "cpu"

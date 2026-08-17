@@ -1,0 +1,19 @@
+paths:
+  project_root: "."
+  input_dir: "./input"
+  output_dir: "./output"
+  models_dir: "./models"
+
+calibration:
+  pnlcalib:
+    root: "../CalibrationEngines/PnLCalib"
+    device: "cpu"
+    weights_kp: "../CalibrationEngines/PnLCalib/weights/SV_kp"
+    weights_line: "../CalibrationEngines/PnLCalib/weights/SV_lines"
+  tvcalib:
+    root: "../CalibrationEngines/tvcalib"
+    device: "cpu"
+    checkpoint: "../CalibrationEngines/tvcalib/data/segment_localization/train_59.pt"
+
+runtime:
+  preferred_device: "cpu"
