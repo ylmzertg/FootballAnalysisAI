@@ -11,12 +11,14 @@ from typing import Optional
 
 import cv2
 import numpy as np
+import torch
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from adapters.pnlcalib import PnLCalibAdapter
+from core.runtime_paths import resolve_engine_path, resolve_project_path
 from core.team_classifier_v24 import (
     GOALKEEPER,
     PLAYER,
@@ -66,14 +68,19 @@ def parse_args():
     )
     p.add_argument(
         "--source",
-        default=r"E:\Youtube\SporAnimasyon\SporAnimasyonCalisma\data\input\input.mp4",
+        default=r"input\input.mp4",
     )
     p.add_argument("--tracking", default=r"output\player_tracking.jsonl")
     p.add_argument(
         "--pnl-root",
-        default=r"E:\Youtube\SporAnimasyon\CalibrationEngines\PnLCalib",
+        default="",
+        help="PnLCalib root. Empty uses ../CalibrationEngines/PnLCalib.",
     )
-    p.add_argument("--device", default="cuda:0")
+    p.add_argument(
+        "--device",
+        default="auto",
+        help="PnLCalib device: auto, cpu, cuda, or cuda:0.",
+    )
     p.add_argument(
         "--output",
         default=r"output\team_classification_v24_pnl_exact.mp4",
@@ -128,9 +135,11 @@ def parse_args():
     return p.parse_args()
 
 
-def resolve_project_path(value: str) -> Path:
-    p = Path(value)
-    return p if p.is_absolute() else PROJECT_ROOT / p
+def resolve_device(value: str) -> str:
+    requested = str(value).strip().lower()
+    if requested == "auto":
+        return "cuda:0" if torch.cuda.is_available() else "cpu"
+    return value
 
 
 def read_jsonl(path: Path) -> dict[int, dict]:
@@ -479,9 +488,10 @@ def draw_mini_pitch(
 def main():
     args = parse_args()
 
-    source = Path(args.source)
+    source = resolve_project_path(args.source)
     tracking_path = resolve_project_path(args.tracking)
-    pnl_root = Path(args.pnl_root)
+    pnl_root = resolve_engine_path(args.pnl_root, "PnLCalib")
+    pnl_device = resolve_device(args.device)
     output_path = resolve_project_path(args.output)
     jsonl_path = resolve_project_path(args.jsonl)
     calibration_json_path = resolve_project_path(args.calibration_json)
@@ -508,6 +518,7 @@ def main():
     print(f"Source             : {source}")
     print(f"Tracking           : {tracking_path}")
     print(f"PnLCalib           : {pnl_root}")
+    print(f"PnL device         : {pnl_device}")
     print(f"Calibration stride : {args.calibration_stride}")
     print(f"Pitch margin       : {args.pitch_margin:.2f} m")
     print("=" * 92)
@@ -518,7 +529,7 @@ def main():
         tracked_frames=tracked_frames,
         output_dir=calibration_frames_dir,
         stride=args.calibration_stride,
-        device=args.device,
+        device=pnl_device,
         min_quality=args.min_calibration_quality,
     )
     calibration_json_path.write_text(

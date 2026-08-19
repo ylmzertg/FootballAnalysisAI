@@ -2,17 +2,21 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ENGINES_ROOT = PROJECT_ROOT.parent / "CalibrationEngines"
 
 
 def resolve_project_path(value: str | Path) -> Path:
-    """
-    Resolve a path relative to the FootballAnalysisAI repository root.
+    path = Path(value).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+    return (PROJECT_ROOT / path).resolve()
 
-    Absolute paths are preserved. This makes command-line scripts portable
-    across Windows machines without hard-coded drive letters.
-    """
+
+def resolve_engine_path(value: str | Path | None, engine_name: str) -> Path:
+    if value is None or not str(value).strip():
+        return (ENGINES_ROOT / engine_name).resolve()
+
     path = Path(value).expanduser()
     if path.is_absolute():
         return path.resolve()
