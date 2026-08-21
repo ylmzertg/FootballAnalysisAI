@@ -48,3 +48,6 @@ Thumbs.db
 
 # External calibration engines
 CalibrationEngines/
+
+# Local Python wheel installers
+*.whl

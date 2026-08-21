@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -134,9 +134,16 @@ def main():
     from torchvision.models.segmentation import deeplabv3_resnet101 as _deeplabv3_resnet101
 
     def _deeplab_no_external_weights(*a, **kw):
-        kw["weights"] = None
-        kw["weights_backbone"] = None
-        return _deeplabv3_resnet101(*a, **kw)
+        try:
+            return _deeplabv3_resnet101(*a, weights=None, weights_backbone=None, **kw)
+        except TypeError as exc:
+            if "unexpected keyword argument" not in str(exc):
+                raise
+            kw.pop("weights", None)
+            kw.pop("weights_backbone", None)
+            kw["pretrained"] = False
+            kw["pretrained_backbone"] = False
+            return _deeplabv3_resnet101(*a, **kw)
 
     tv_inference.deeplabv3_resnet101 = _deeplab_no_external_weights
 
@@ -190,10 +197,19 @@ def main():
             image_id_to_original[target.name] = source
 
         print("[TVCalib worker] loading segmentation model...")
-        model_seg = InferenceSegmentationModel(
-            checkpoint,
-            device,
-        )
+        _original_torch_load = torch.load
+        if str(device) == "cpu":
+            def _torch_load_cpu(*args, **kwargs):
+                kwargs.setdefault("map_location", "cpu")
+                return _original_torch_load(*args, **kwargs)
+            torch.load = _torch_load_cpu
+        try:
+            model_seg = InferenceSegmentationModel(
+                checkpoint,
+                device,
+            )
+        finally:
+            torch.load = _original_torch_load
 
         dataset_seg = InferenceDatasetSegmentation(
             tmp_dir,
@@ -399,3 +415,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
