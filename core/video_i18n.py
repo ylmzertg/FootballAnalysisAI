@@ -28,6 +28,7 @@ _TRANSLATIONS = {
         "actual_pass": "Gerçek karar: pas",
         "actual_shot": "Gerçek karar: ŞUT",
         "actual_carry": "Gerçek karar: topu taşıma / oyuna devam",
+        "actual_turnover": "Gerçek karar: TOP KAYBI",
         "actual_unknown": "Gerçek karar: güvenilir biçimde çözülemedi",
         "no_ranked_option": "Sistem: güvenilir BEST/GOOD pas bulunamadı",
         "ranked_option": (
@@ -44,6 +45,9 @@ _TRANSLATIONS = {
         "shot_over_pass": (
             "Sistem ID {best_id} yönünde güçlü bir pas alternatifi görürken "
             "top sahibi şutu tercih etti."
+        ),
+        "turnover_over_pass": (
+            "Sistem ID {best_id} yönünde daha iyi bir pas seçeneği görürken gerçek aksiyon top kaybıyla sonuçlandı."
         ),
         "no_clear_comparison": (
             "Gerçek aksiyon güvenilir biçimde karşılaştırılamadı."
@@ -71,6 +75,7 @@ _TRANSLATIONS = {
         "actual_pass": "Actual decision: pass",
         "actual_shot": "Actual decision: SHOT",
         "actual_carry": "Actual decision: carry / continue play",
+        "actual_turnover": "Actual decision: TURNOVER",
         "actual_unknown": "Actual decision: could not be resolved reliably",
         "no_ranked_option": "Model: no reliable BEST/GOOD passing option",
         "ranked_option": (
@@ -87,6 +92,9 @@ _TRANSLATIONS = {
         "shot_over_pass": (
             "The model identified a strong passing alternative toward ID "
             "{best_id}, while the player chose to shoot."
+        ),
+        "turnover_over_pass": (
+            "The model identified a stronger passing option toward ID {best_id}, while the actual action resulted in a turnover."
         ),
         "no_clear_comparison": (
             "The actual action could not be compared reliably."
@@ -114,6 +122,7 @@ _TRANSLATIONS = {
         "actual_pass": "Decisión real: pase",
         "actual_shot": "Decisión real: DISPARO",
         "actual_carry": "Decisión real: conducción / continuidad",
+        "actual_turnover": "Decisión real: PÉRDIDA",
         "actual_unknown": "Decisión real: no pudo resolverse con fiabilidad",
         "no_ranked_option": "Sistema: no hay una opción BEST/GOOD fiable",
         "ranked_option": (
@@ -130,6 +139,9 @@ _TRANSLATIONS = {
         "shot_over_pass": (
             "El sistema detectó una alternativa de pase fuerte hacia el ID "
             "{best_id}, pero el jugador eligió disparar."
+        ),
+        "turnover_over_pass": (
+            "El modelo identificó una mejor opción de pase hacia ID {best_id}, mientras la acción real terminó en pérdida."
         ),
         "no_clear_comparison": (
             "La acción real no pudo compararse con fiabilidad."
@@ -157,6 +169,7 @@ _TRANSLATIONS = {
         "actual_pass": "Tatsächliche Entscheidung: Pass",
         "actual_shot": "Tatsächliche Entscheidung: SCHUSS",
         "actual_carry": "Tatsächliche Entscheidung: Dribbling / Fortsetzung",
+        "actual_turnover": "Tatsächliche Entscheidung: BALLVERLUST",
         "actual_unknown": "Tatsächliche Entscheidung konnte nicht sicher ermittelt werden",
         "no_ranked_option": "System: keine verlässliche BEST/GOOD-Passoption",
         "ranked_option": (
@@ -173,6 +186,9 @@ _TRANSLATIONS = {
         "shot_over_pass": (
             "Das System erkannte eine starke Passalternative zu ID {best_id}, "
             "der Spieler entschied sich jedoch für den Schuss."
+        ),
+        "turnover_over_pass": (
+            "Das System erkannte eine bessere Passoption zu ID {best_id}, während die tatsächliche Aktion in einem Ballverlust endete."
         ),
         "no_clear_comparison": (
             "Die tatsächliche Aktion konnte nicht zuverlässig verglichen werden."
@@ -200,6 +216,7 @@ _TRANSLATIONS = {
         "actual_pass": "Décision réelle : passe",
         "actual_shot": "Décision réelle : TIR",
         "actual_carry": "Décision réelle : conduite / poursuite",
+        "actual_turnover": "Décision réelle : PERTE DE BALLE",
         "actual_unknown": "Décision réelle : impossible à déterminer avec fiabilité",
         "no_ranked_option": "Système : aucune option BEST/GOOD fiable",
         "ranked_option": (
@@ -216,6 +233,9 @@ _TRANSLATIONS = {
         "shot_over_pass": (
             "Le système identifiait une forte option de passe vers ID {best_id}, "
             "mais le joueur a choisi de tirer."
+        ),
+        "turnover_over_pass": (
+            "Le système a identifié une meilleure option de passe vers ID {best_id}, tandis que l'action réelle s'est soldée par une perte de balle."
         ),
         "no_clear_comparison": (
             "L'action réelle n'a pas pu être comparée de façon fiable."
@@ -243,6 +263,7 @@ _TRANSLATIONS = {
         "actual_pass": "Decisão real: passe",
         "actual_shot": "Decisão real: CHUTE",
         "actual_carry": "Decisão real: condução / continuidade",
+        "actual_turnover": "Decisão real: PERDA DE BOLA",
         "actual_unknown": "Decisão real: não foi possível determinar com segurança",
         "no_ranked_option": "Sistema: nenhuma opção BEST/GOOD confiável",
         "ranked_option": (
@@ -259,6 +280,9 @@ _TRANSLATIONS = {
         "shot_over_pass": (
             "O sistema identificou uma forte alternativa de passe para ID "
             "{best_id}, mas o jogador optou pelo chute."
+        ),
+        "turnover_over_pass": (
+            "O sistema identificou uma opção de passe melhor para o ID {best_id}, enquanto a ação real terminou em perda de bola."
         ),
         "no_clear_comparison": (
             "A ação real não pôde ser comparada com segurança."

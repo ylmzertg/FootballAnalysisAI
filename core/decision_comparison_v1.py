@@ -7,11 +7,13 @@ from typing import Optional
 ACTUAL_PASS = "PASS"
 ACTUAL_SHOT = "SHOT"
 ACTUAL_CARRY = "CARRY_OR_CONTINUE"
+ACTUAL_TURNOVER = "TURNOVER"
 ACTUAL_UNKNOWN = "UNKNOWN"
 
 MATCHED_BEST = "MATCHED_BEST"
 CHOSE_ALTERNATIVE = "CHOSE_ALTERNATIVE"
 SHOT_OVER_PASS = "SHOT_OVER_PASS"
+TURNOVER_OVER_PASS = "TURNOVER_OVER_PASS"
 NO_CLEAR_COMPARISON = "NO_CLEAR_COMPARISON"
 
 
@@ -56,6 +58,13 @@ def compare_decision(
         explanation = (
             f"Sistem ID {best_receiver_id} yönünü güçlü pas alternatifi olarak "
             f"görürken top sahibi şutu tercih etti."
+        )
+
+    elif actual_action == ACTUAL_TURNOVER:
+        comparison = TURNOVER_OVER_PASS
+        explanation = (
+            f"Sistem ID {best_receiver_id} y?n?nde g??l? bir pas alternatifi "
+            f"g?r?rken ger?ek aksiyon rakip top kontrol?yle sonu?land?."
         )
 
     elif (

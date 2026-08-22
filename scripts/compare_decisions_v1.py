@@ -7,6 +7,7 @@ from pathlib import Path
 from core.decision_comparison_v1 import (
     ACTUAL_PASS,
     ACTUAL_SHOT,
+    ACTUAL_TURNOVER,
     ACTUAL_UNKNOWN,
     compare_decision,
 )
@@ -121,7 +122,7 @@ def find_actual_action(
             first_shot = frame
             break
 
-    first_pass = None
+    first_action = None
 
     for frame in range(start_frame, end_frame + 1):
         row = possession_rows.get(frame, {})
@@ -143,17 +144,42 @@ def find_actual_action(
         if target_owner is None:
             continue
 
-        first_pass = (
+        source_team = row.get("source_team")
+        target_team = row.get("target_team")
+
+        valid_teams = {"TEAM_A", "TEAM_B"}
+
+        if (
+            source_team in valid_teams
+            and target_team in valid_teams
+        ):
+            action = (
+                ACTUAL_PASS
+                if source_team == target_team
+                else ACTUAL_TURNOVER
+            )
+
+            first_action = (
+                frame,
+                action,
+                int(target_owner),
+            )
+            break
+
+        # A flight with a resolved target but unresolved team identity
+        # must not be promoted to a completed pass.
+        first_action = (
             frame,
-            int(target_owner),
+            ACTUAL_UNKNOWN,
+            None,
         )
         break
 
     if (
         first_shot is not None
         and (
-            first_pass is None
-            or first_shot <= first_pass[0]
+            first_action is None
+            or first_shot <= first_action[0]
         )
     ):
         return (
@@ -162,11 +188,11 @@ def find_actual_action(
             first_shot,
         )
 
-    if first_pass is not None:
+    if first_action is not None:
         return (
-            ACTUAL_PASS,
-            first_pass[1],
-            first_pass[0],
+            first_action[1],
+            first_action[2],
+            first_action[0],
         )
 
     return (
