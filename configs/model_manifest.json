@@ -1,0 +1,30 @@
+﻿{
+  "schema_version": 1,
+  "model_set": "roboflow-sports-soccer",
+  "models": [
+    {
+      "name": "football-ball-detection.pt",
+      "role": "ball_detection",
+      "required": true,
+      "bytes": 136786099,
+      "sha256": "678FBAD05134F19C5094CB8D273812EC9C6691228180D46832551ECF99ED2912",
+      "gdrive_id": "1isw4wx-MK9h9LMr36VvIWlJD6ppUvw7V"
+    },
+    {
+      "name": "football-player-detection.pt",
+      "role": "player_detection",
+      "required": true,
+      "bytes": 136802409,
+      "sha256": "75B09C377FBF9D0791D23F6CFB689F5AED6EAA43A6818BD1FB884CF7507FFFAF",
+      "gdrive_id": "17PXFNlx-jI7VjVo_vQnB1sONjRyvoB-q"
+    },
+    {
+      "name": "football-pitch-detection.pt",
+      "role": "pitch_detection",
+      "required": true,
+      "bytes": 140212306,
+      "sha256": "28F68F7C4056D6D9B137EFD2E7AB5F3C494039380C63831649126CED25628B36",
+      "gdrive_id": "1Ma5Kt86tgpdjCTKfum79YMgNnSjcoOyf"
+    }
+  ]
+}

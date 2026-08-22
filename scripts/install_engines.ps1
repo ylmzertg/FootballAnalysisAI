@@ -18,8 +18,56 @@ function Repo($path,$url,[switch]$Sub){
   if($LASTEXITCODE -ne 0){throw "git clone failed: $url"}
 }
 function Venv($py,$root){
-  $v=Join-Path $root ".venv\Scripts\python.exe"
-  if(-not(Test-Path $v)){& $py -m venv (Join-Path $root ".venv")}
+  $venvRoot=Join-Path $root ".venv"
+  $v=Join-Path $venvRoot "Scripts\python.exe"
+
+  $expected=& $py -c "import sys;print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+  if($LASTEXITCODE -ne 0 -or -not $expected){
+    throw "Could not determine Python version: $py"
+  }
+  $expected=$expected.Trim()
+
+  $healthy=$false
+
+  if(Test-Path $v){
+    try{
+      $actual=& $v -c "import sys;print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>$null
+      $pythonOk=($LASTEXITCODE -eq 0 -and $actual -and $actual.Trim() -eq $expected)
+
+      & $v -m pip --version *> $null
+      $pipOk=($LASTEXITCODE -eq 0)
+
+      $healthy=($pythonOk -and $pipOk)
+    }
+    catch{
+      $healthy=$false
+    }
+  }
+
+  if(-not $healthy){
+    if(Test-Path $venvRoot){
+      Write-Host "[REBUILD] invalid virtual environment: $venvRoot"
+      Remove-Item $venvRoot -Recurse -Force
+    }
+    else{
+      Write-Host "[CREATE] virtual environment: $venvRoot"
+    }
+
+    & $py -m venv $venvRoot
+
+    if($LASTEXITCODE -ne 0 -or -not(Test-Path $v)){
+      throw "Virtual environment creation failed: $venvRoot"
+    }
+
+    & $v -m pip --version *> $null
+    if($LASTEXITCODE -ne 0){
+      throw "pip is unavailable after venv creation: $venvRoot"
+    }
+  }
+  else{
+    Write-Host "[OK] virtual environment: $venvRoot | Python $expected | pip OK"
+  }
+
   return $v
 }
 

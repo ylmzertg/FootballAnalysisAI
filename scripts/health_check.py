@@ -6,6 +6,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.model_manifest import verify_models
+
 def ok(label, detail=""):
     print(f"[OK]   {label}" + (f" | {detail}" if detail else ""))
 
@@ -26,7 +28,7 @@ def main():
     all_ok = True
 
     print("="*78)
-    print("FootballAnalysisAI - Windows Health Check v1.2")
+    print("FootballAnalysisAI - Windows Health Check v2.0")
     print(f"Project : {PROJECT_ROOT}")
     print(f"Engines : {engines}")
     print("="*78)
@@ -92,15 +94,31 @@ def main():
     else:
         all_ok &= fail("TVCalib Python", str(tvpy))
 
-    model = PROJECT_ROOT/"models"/"football-player-detection.pt"
-    if model.exists():
-        ok("Football detection model", f"{model.stat().st_size} bytes")
-    else:
-        print("[WARN] models/football-player-detection.pt is missing; copy/download it before player detection.")
+    try:
+        model_checks = verify_models(PROJECT_ROOT)
+
+        if not model_checks:
+            all_ok &= fail("Football model manifest", "manifest contains no models")
+        else:
+            for check in model_checks:
+                detail = (
+                    f"role={check.role} "
+                    f"bytes={check.actual_bytes} "
+                    f"size_ok={check.size_ok} "
+                    f"sha256_ok={check.sha256_ok}"
+                )
+
+                if check.ok:
+                    ok(f"Model {check.name}", detail)
+                else:
+                    all_ok &= fail(f"Model {check.name}", detail)
+
+    except Exception as e:
+        all_ok &= fail("Football model manifest", repr(e))
 
     print("="*78)
     if all_ok:
-        print("READY - portable CPU baseline is installed.")
+        print("READY - portable runtime baseline is installed.")
         return 0
     print("NOT READY - see [FAIL] lines above.")
     return 1

@@ -6,3 +6,4 @@ pytest
 scikit-learn
 ultralytics
 supervision==0.25.0
+gdown
